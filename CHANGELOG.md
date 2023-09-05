@@ -1,3 +1,14 @@
+## 1.0.7
+* Fixed an issue where only one bank showed-up in the banks dropdown
+* Fixed build issues caused by androidx material library
+* Fixed build issues caused by using the wrong android `compileSdkVersion`
+
+## 1.0.6
+* Completed migration for Android v2 embedding.
+* Fixed colour issues in dark mode
+* Upgrades Kotlin and AGP versions.
+* Fixed build issues for Flutter 3
+
 ## 1.0.5+1
 * Updated dependencies
 * Updated ReadMe
