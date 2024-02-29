@@ -73,6 +73,10 @@ class AuthActivity : Activity() {
                 }
         }
 
+        webView?.settings?.allowContentAccess = false
+        webView?.settings?.allowFileAccess = false
+        webView?.settings?.allowFileAccessFromFileURLs = false
+        webView?.settings?.allowUniversalAccessFromFileURLs = false
 
         webView?.settings?.javaScriptEnabled = true
         webView?.settings?.javaScriptCanOpenWindowsAutomatically = true
@@ -96,6 +100,7 @@ class AuthActivity : Activity() {
         super.onDestroy()
         webView?.stopLoading()
         webView?.removeJavascriptInterface("INTERFACE")
+        webView?.clearCache(true)
         handleResponse()
     }
 
