@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:http/http.dart' as http;
@@ -377,7 +378,7 @@ class _HomePageState extends State<HomePage> {
   Widget _getPlatformButton(String string, Function() function) {
     // is still in progress
     Widget widget;
-    if (Platform.isIOS) {
+    if (!kIsWeb && Platform.isIOS) {
       widget = new CupertinoButton(
         onPressed: function,
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
