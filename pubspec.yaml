@@ -10,6 +10,7 @@ dependencies:
   intl: ^0.18.1
   meta: ^1.8.0
   async: ^2.9.0
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:
