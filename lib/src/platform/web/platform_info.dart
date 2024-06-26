@@ -1,35 +1,42 @@
-import 'dart:io';
 import 'dart:html' as html;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_paystack/src/platform/platform_info_interface.dart';
 import 'package:uuid/uuid.dart';
 
+Future<PlatformInfoInterface> getPlatformInfo(
+  String version,
+  MethodChannel _,
+) async {
+  return PlatformInfo.from(version);
+}
+
 /// Holds data that's different on Android and iOS
-class PlatformInfo {
-  final String userAgent;
-  final String paystackBuild;
+class PlatformInfo implements PlatformInfoInterface {
+  PlatformInfo._({
+    required this.userAgent,
+    required this.paystackBuild,
+    required this.deviceId,
+  });
+
+  @override
   final String deviceId;
 
-  static Future<PlatformInfo> fromMethodChannel(MethodChannel channel) async {
-    // TODO: Update for every new versions.
-    final pluginVersion = "2.0.0";
+  @override
+  final String paystackBuild;
 
-    final platform = kIsWeb ? 'web' : Platform.operatingSystem;
-    String userAgent = "${platform}_Paystack_$pluginVersion";
-    String deviceId = await getDeviceId(channel);
+  @override
+  final String userAgent;
+
+  static Future<PlatformInfo> from(String version) async {
+    final platform = 'web';
+    String userAgent = "${platform}_Paystack_$version";
+    String deviceId = await getWebDeviceId();
     return PlatformInfo._(
       userAgent: userAgent,
-      paystackBuild: pluginVersion,
+      paystackBuild: version,
       deviceId: deviceId,
     );
-  }
-
-  static Future<String> getDeviceId(MethodChannel channel) async {
-    if (kIsWeb) {
-      return getWebDeviceId();
-    }
-    return await channel.invokeMethod('getDeviceId') ?? "";
   }
 
   /// Generates a unique device id for web and stores it in local storage
@@ -49,14 +56,6 @@ class PlatformInfo {
 
     return deviceId;
   }
-
-  const PlatformInfo._({
-    required String userAgent,
-    required String paystackBuild,
-    required String deviceId,
-  })  : userAgent = userAgent,
-        paystackBuild = paystackBuild,
-        deviceId = deviceId;
 
   @override
   String toString() {

@@ -3,17 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_paystack/src/common/exceptions.dart';
-import 'package:flutter_paystack/src/common/platform_info.dart';
 import 'package:flutter_paystack/src/common/utils.dart';
 import 'package:flutter_paystack/src/models/card.dart';
 import 'package:flutter_paystack/src/models/charge.dart';
 import 'package:flutter_paystack/src/models/checkout_response.dart';
 import 'package:flutter_paystack/src/platform/paystack_interface.dart';
+import 'package:flutter_paystack/src/platform/platform_info_interface.dart';
 
 class PaystackPlugin {
   bool _sdkInitialized = false;
   String _publicKey = "";
-  static late PlatformInfo platformInfo;
+  static late PlatformInfoInterface platformInfo;
 
   /// Initialize the Paystack object. It should be called as early as possible
   /// (preferably in initState() of the Widget.
@@ -37,7 +37,8 @@ class PaystackPlugin {
 
     // Using cascade notation to build the platform specific info
     try {
-      platformInfo = await PlatformInfo.fromMethodChannel(Utils.methodChannel);
+      platformInfo =
+          await PlatformInfoInterface.fromMethodChannel(Utils.methodChannel);
       _sdkInitialized = true;
     } on PlatformException {
       rethrow;
