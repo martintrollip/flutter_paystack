@@ -137,6 +137,37 @@ class PaystackPlugin {
     );
   }
 
+  /// Make payment by charging showing a popup
+  ///
+  /// [charge] - the charge object, no card details required on the charge
+  void inline({
+    required Charge charge,
+    String? label,
+    void Function({
+      String? status,
+      String? reference,
+      String? message,
+    })? onSuccess,
+    void Function({
+      String? id,
+      dynamic customer,
+      String? accessCode,
+    })? onLoad,
+    void Function({String? message})? onError,
+    void Function()? onCancel,
+  }) {
+    _performChecks();
+
+    return PaystackInterface(publicKey).inlinePopup(
+      charge: charge,
+      label: label,
+      onSuccess: onSuccess,
+      onError: onError,
+      onLoad: onLoad,
+      onCancel: onCancel,
+    );
+  }
+
   _validateSdkInitialized() {
     if (!sdkInitialized) {
       throw new PaystackSdkNotInitializedException(

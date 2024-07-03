@@ -8,6 +8,23 @@ import 'package:flutter_paystack/src/platform/paystack_stub.dart'
 abstract class PaystackInterface {
   factory PaystackInterface(String publicKey) => getPaystack(publicKey);
 
+  void inlinePopup({
+    required Charge charge,
+    String? label,
+    void Function({
+      String? status,
+      String? reference,
+      String? message,
+    })? onSuccess,
+    void Function({
+      String? id,
+      dynamic customer,
+      String? accessCode,
+    })? onLoad,
+    void Function({String? message})? onError,
+    void Function()? onCancel,
+  });
+
   Future<CheckoutResponse> chargeCard({
     required BuildContext context,
     required Charge charge,

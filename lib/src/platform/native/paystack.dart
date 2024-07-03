@@ -11,9 +11,9 @@ import 'package:flutter_paystack/src/widgets/checkout/checkout_widget.dart';
 PaystackInterface getPaystack(String publicKey) => Paystack(publicKey);
 
 class Paystack implements PaystackInterface {
-  final String publicKey;
+  const Paystack(this.publicKey);
 
-  Paystack(this.publicKey);
+  final String publicKey;
 
   @override
   Future<CheckoutResponse> chargeCard(
@@ -79,5 +79,18 @@ class Paystack implements PaystackInterface {
     if (!StringUtils.isValidEmail(charge.email)) {
       throw new InvalidEmailException(charge.email);
     }
+  }
+
+  @override
+  void inlinePopup({
+    required Charge charge,
+    String? label,
+    void Function({String? message, String? reference, String? status})?
+        onSuccess,
+    void Function({String? accessCode, dynamic customer, String? id})? onLoad,
+    void Function({String? message})? onError,
+    void Function()? onCancel,
+  }) {
+    debugPrint('inlinePopup not implemented for native');
   }
 }
