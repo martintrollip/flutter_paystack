@@ -85,11 +85,10 @@ class Paystack implements PaystackInterface {
   void inlinePopup({
     required Charge charge,
     String? label,
-    void Function({String? message, String? reference, String? status})?
-        onSuccess,
-    void Function({String? accessCode, dynamic customer, String? id})? onLoad,
-    void Function({String? message})? onError,
-    void Function()? onCancel,
+    OnSuccess? onSuccess,
+    OnLoad? onLoad,
+    OnError? onError,
+    OnCancel? onCancel,
   }) {
     debugPrint('inlinePopup not implemented for native');
   }

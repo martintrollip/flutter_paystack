@@ -20,18 +20,10 @@ class Paystack implements PaystackInterface {
   void inlinePopup({
     required Charge charge,
     String? label,
-    void Function({
-      String? status,
-      String? reference,
-      String? message,
-    })? onSuccess,
-    void Function({
-      String? id,
-      dynamic customer,
-      String? accessCode,
-    })? onLoad,
-    void Function({String? message})? onError,
-    void Function()? onCancel,
+    OnSuccess? onSuccess,
+    OnLoad? onLoad,
+    OnError? onError,
+    OnCancel? onCancel,
   }) {
     assert(
       charge.email != null && charge.reference != null,

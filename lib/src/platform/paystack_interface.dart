@@ -4,6 +4,22 @@ import 'package:flutter_paystack/src/platform/paystack_stub.dart'
     if (dart.library.io) 'native/paystack.dart'
     if (dart.library.js) 'web/paystack.dart';
 
+typedef OnSuccess = void Function({
+  String? status,
+  String? reference,
+  String? message,
+});
+
+typedef OnLoad = void Function({
+  String? id,
+  dynamic customer,
+  String? accessCode,
+});
+
+typedef OnError = void Function({String? message});
+
+typedef OnCancel = void Function();
+
 /// An abstract class for Paystack to be implemented by the platform
 abstract class PaystackInterface {
   factory PaystackInterface(String publicKey) => getPaystack(publicKey);
@@ -11,18 +27,10 @@ abstract class PaystackInterface {
   void inlinePopup({
     required Charge charge,
     String? label,
-    void Function({
-      String? status,
-      String? reference,
-      String? message,
-    })? onSuccess,
-    void Function({
-      String? id,
-      dynamic customer,
-      String? accessCode,
-    })? onLoad,
-    void Function({String? message})? onError,
-    void Function()? onCancel,
+    OnSuccess? onSuccess,
+    OnLoad? onLoad,
+    OnError? onError,
+    OnCancel? onCancel,
   });
 
   Future<CheckoutResponse> chargeCard({

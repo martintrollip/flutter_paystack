@@ -229,7 +229,17 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                   ],
-                                )
+                                ),
+                                new Flexible(
+                                  flex: 2,
+                                  child: new Container(
+                                    width: double.infinity,
+                                    child: _getPlatformButton(
+                                      'Inline',
+                                      () => _startAfreshCharge(inline: true),
+                                    ),
+                                  ),
+                                ),
                               ],
                             );
                     },
@@ -285,11 +295,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _startAfreshCharge() async {
+  _startAfreshCharge({bool inline = false}) async {
     _formKey.currentState?.save();
 
     Charge charge = Charge();
-    charge.card = _getCardFromUI();
+    if (!inline) {
+      charge.card = _getCardFromUI();
+    }
 
     setState(() => _inProgress = true);
 
@@ -304,7 +316,12 @@ class _HomePageState extends State<HomePage> {
         ..email = 'customer@email.com'
         ..reference = _getReference()
         ..putCustomField('Charged From', 'Flutter SDK');
-      _chargeCard(charge);
+
+      if (!inline) {
+        _chargeCard(charge);
+      } else {
+        _inline(charge);
+      }
     } else {
       // Perform transaction/initialize on Paystack server to get an access code
       // documentation: https://developers.paystack.co/reference#initialize-a-transaction
@@ -333,9 +350,41 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  _inline(Charge charge) async {
+    plugin.inline(
+      charge: charge,
+      label: 'Test Label',
+      onSuccess: onSuccess,
+      onError: onError,
+      onCancel: onCancel,
+      onLoad: onLoad,
+    );
+  }
+
+  void onSuccess({String? status, String? reference, String? message}) {
+    setState(() => _inProgress = false);
+    _updateStatus(reference, message ?? '');
+  }
+
+  void onError({String? message}) {
+    setState(() => _inProgress = false);
+    _showMessage('Error occurred: $message');
+  }
+
+  void onCancel() {
+    setState(() => _inProgress = false);
+    _showMessage('Transaction was canceled');
+  }
+
+  void onLoad({String? id, dynamic customer, String? accessCode}) {
+    print('Loaded transaction $id');
+  }
+
   String _getReference() {
     String platform;
-    if (isIos()) {
+    if (kIsWeb) {
+      platform = 'Web';
+    } else if (isIos()) {
       platform = 'iOS';
     } else {
       platform = 'Android';
