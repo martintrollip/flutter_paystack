@@ -2,23 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_paystack/src/api/service/bank_service.dart';
-import 'package:flutter_paystack/src/api/service/card_service.dart';
 import 'package:flutter_paystack/src/common/exceptions.dart';
-import 'package:flutter_paystack/src/common/my_strings.dart';
-import 'package:flutter_paystack/src/common/platform_info.dart';
-import 'package:flutter_paystack/src/common/string_utils.dart';
 import 'package:flutter_paystack/src/common/utils.dart';
 import 'package:flutter_paystack/src/models/card.dart';
 import 'package:flutter_paystack/src/models/charge.dart';
 import 'package:flutter_paystack/src/models/checkout_response.dart';
-import 'package:flutter_paystack/src/transaction/card_transaction_manager.dart';
-import 'package:flutter_paystack/src/widgets/checkout/checkout_widget.dart';
+import 'package:flutter_paystack/src/platform/paystack_interface.dart';
+import 'package:flutter_paystack/src/platform/platform_info_interface.dart';
 
 class PaystackPlugin {
   bool _sdkInitialized = false;
   String _publicKey = "";
-  static late PlatformInfo platformInfo;
+  static late PlatformInfoInterface platformInfo;
 
   /// Initialize the Paystack object. It should be called as early as possible
   /// (preferably in initState() of the Widget.
@@ -42,7 +37,8 @@ class PaystackPlugin {
 
     // Using cascade notation to build the platform specific info
     try {
-      platformInfo = await PlatformInfo.fromMethodChannel(Utils.methodChannel);
+      platformInfo =
+          await PlatformInfoInterface.fromMethodChannel(Utils.methodChannel);
       _sdkInitialized = true;
     } on PlatformException {
       rethrow;
@@ -81,7 +77,10 @@ class PaystackPlugin {
       {required Charge charge}) {
     _performChecks();
 
-    return _Paystack(publicKey).chargeCard(context: context, charge: charge);
+    return PaystackInterface(publicKey).chargeCard(
+      context: context,
+      charge: charge,
+    );
   }
 
   /// Make payment using Paystack's checkout form. The plugin will handle the whole
@@ -127,7 +126,7 @@ class PaystackPlugin {
     bool hideEmail = false,
     bool hideAmount = false,
   }) async {
-    return _Paystack(publicKey).checkout(
+    return PaystackInterface(publicKey).checkout(
       context,
       charge: charge,
       method: method,
@@ -138,81 +137,34 @@ class PaystackPlugin {
     );
   }
 
+  /// Make payment by charging showing a popup
+  ///
+  /// [charge] - the charge object, no card details required on the charge
+  void inline({
+    required Charge charge,
+    String? label,
+    OnSuccess? onSuccess,
+    OnLoad? onLoad,
+    OnError? onError,
+    OnCancel? onCancel,
+  }) {
+    _performChecks();
+
+    return PaystackInterface(publicKey).inlinePopup(
+      charge: charge,
+      label: label,
+      onSuccess: onSuccess,
+      onError: onError,
+      onLoad: onLoad,
+      onCancel: onCancel,
+    );
+  }
+
   _validateSdkInitialized() {
     if (!sdkInitialized) {
       throw new PaystackSdkNotInitializedException(
           'Paystack SDK has not been initialized. The SDK has'
           ' to be initialized before use');
-    }
-  }
-}
-
-class _Paystack {
-  final String publicKey;
-
-  _Paystack(this.publicKey);
-
-  Future<CheckoutResponse> chargeCard(
-      {required BuildContext context, required Charge charge}) {
-    return new CardTransactionManager(
-            service: CardService(),
-            charge: charge,
-            context: context,
-            publicKey: publicKey)
-        .chargeCard();
-  }
-
-  Future<CheckoutResponse> checkout(
-    BuildContext context, {
-    required Charge charge,
-    required CheckoutMethod method,
-    required bool fullscreen,
-    bool hideEmail = false,
-    bool hideAmount = false,
-    Widget? logo,
-  }) async {
-    assert(() {
-      _validateChargeAndKey(charge);
-      switch (method) {
-        case CheckoutMethod.card:
-          if (charge.accessCode == null && charge.reference == null) {
-            throw new ChargeException(Strings.noAccessCodeReference);
-          }
-          break;
-        case CheckoutMethod.bank:
-        case CheckoutMethod.selectable:
-          if (charge.accessCode == null) {
-            throw new ChargeException('Pass an accesscode');
-          }
-          break;
-      }
-      return true;
-    }());
-
-    CheckoutResponse? response = await showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) => new CheckoutWidget(
-        publicKey: publicKey,
-        bankService: BankService(),
-        cardsService: CardService(),
-        method: method,
-        charge: charge,
-        fullscreen: fullscreen,
-        logo: logo,
-        hideAmount: hideAmount,
-        hideEmail: hideEmail,
-      ),
-    );
-    return response == null ? CheckoutResponse.defaults() : response;
-  }
-
-  _validateChargeAndKey(Charge charge) {
-    if (charge.amount.isNegative) {
-      throw new InvalidAmountException(charge.amount);
-    }
-    if (!StringUtils.isValidEmail(charge.email)) {
-      throw new InvalidEmailException(charge.email);
     }
   }
 }
